@@ -13,6 +13,7 @@ npm run dev
 
 # build electron application for production
 npm run build
+```
 
 #### 界面
 ![](https://github.com/xiaowenxia/electron-serialtool/blob/master/doc/界面.png)
