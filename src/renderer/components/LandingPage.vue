@@ -1,122 +1,219 @@
 <template>
   <div id="wrapper">
-    <img id="logo" src="~@/assets/logo.png" alt="electron-vue">
-    <main>
-      <chart :options="line"></chart>
-    </main>
+    <Menu active-name="1">
+        <MenuGroup title="串口设置">
+            <!-- <MenuItem name="0">
+              <Row>
+                  <Col span="24">
+                    <Switch size="large">
+                        <span slot="open">开启</span>
+                        <span slot="close">关闭</span>
+                    </Switch>
+                  </Col>
+              </Row>
+            </MenuItem> -->
+            <MenuItem name="1">
+              <Row>
+                  <Col span="6">
+                    <span>端口:</span>
+                  </Col>
+                  <Col span="12">
+                    <Select v-model="portSelect" size="small">
+                    <Option v-for="item in portList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                    </Select>
+                  </Col>
+                  <Col span="6">
+                    <Button type="primary" shape="circle" size="small" icon="ios-loop" style="margin:0 auto;display:block"></Button>
+                  </Col>
+              </Row>
+            </MenuItem>
+            <MenuItem name="2">
+              <Row>
+                  <Col span="6">
+                    <span style="width:80px">波特率:</span>
+                  </Col>
+                  <Col span="12">
+                    <Select v-model="baudrateSelect" size="small">
+                    <Option v-for="item in baudrateList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                    </Select>
+                  </Col>
+              </Row>
+            </MenuItem>
+            <MenuItem name="3">
+              <Row>
+                  <Col span="6">
+                    <span style="width:80px">数据位:</span>
+                  </Col>
+                  <Col span="12">
+                    <Select v-model="databitSelect" size="small">
+                    <Option v-for="item in databitList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                    </Select>
+                  </Col>
+              </Row>
+            </MenuItem>
+            <MenuItem name="4">
+              <Row>
+                  <Col span="6">
+                    <span style="width:80px">停止位:</span>
+                  </Col>
+                  <Col span="12">
+                    <Select v-model="stopbitSelect" size="small">
+                    <Option v-for="item in stopbitList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                    </Select>
+                  </Col>
+              </Row>
+            </MenuItem>
+            <MenuItem name="5">
+              <Row>
+                  <Col span="6">
+                    <span style="width:80px">校验:</span>
+                  </Col>
+                  <Col span="12">
+                    <Select v-model="paritySelect" size="small">
+                    <Option v-for="item in parityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                    </Select>
+                  </Col>
+              </Row>
+            </MenuItem>
+            <MenuItem name="6">
+              <Row>
+                  <Col span="24">
+                    <Button type="primary" long>打开串口</Button>
+                  </Col>
+              </Row>
+            </MenuItem>
+        </MenuGroup>
+        <MenuGroup title="统计分析">
+            <MenuItem name="21">
+              <Row>
+                  <Col span="12">
+                    <Icon type="ios-upload"></Icon>
+                    <span style="margin-left:10px">发送</span>
+                    
+                  </Col>
+                  <Col span="12">
+                    <span>0 bytes</span>
+                  </Col>
+              </Row>
+                
+            </MenuItem>
+            <MenuItem name="22">
+                <Row>
+                  <Col span="12">
+                    <Icon type="ios-download"></Icon>
+                    <span style="margin-left:10px">接收</span>
+                  </Col>
+                  <Col span="12">
+                    <span>0 bytes</span>
+                  </Col>
+                </Row>
+            </MenuItem>
+        </MenuGroup>
+    </Menu>
+    <div id="recv-area">
+      <Input v-model="serialRecv" type="textarea" :rows="28" placeholder="暂时没有数据"></Input>
+      <Input v-model="serialSend">
+        <Select v-model="serialSendFormat" slot="prepend" style="width: 80px">
+            <Option value="serialSendStr">字符串</Option>
+            <Option value="serialSendHex">十六进制</Option>
+        </Select>
+        <Button slot="append" icon="android-send"></Button>
+      </Input>
+    </div>
+    <br>
   </div>
 </template>
 
 <script>
   import SystemInformation from './LandingPage/SystemInformation'
-  import ECharts from 'vue-echarts/components/ECharts.vue'
-
-  import 'echarts/lib/chart/bar'
-  import 'echarts/lib/chart/line'
-  import 'echarts/lib/chart/pie'
-  import 'echarts/lib/chart/map'
-  import 'echarts/lib/chart/radar'
-  import 'echarts/lib/chart/scatter'
-  import 'echarts/lib/chart/effectScatter'
-  import 'echarts/lib/component/tooltip'
-  import 'echarts/lib/component/polar'
-  import 'echarts/lib/component/geo'
-  import 'echarts/lib/component/legend'
-  import 'echarts/lib/component/title'
-  import 'echarts/lib/component/visualMap'
-
+  
   export default {
     name: 'landing-page',
     components: {
-      SystemInformation,
-      chart: ECharts
+      SystemInformation
     },
     methods: {
     },
     data: function () {
-      var base = +new Date(1968, 9, 3)
-      var oneDay = 24 * 3600 * 1000
-      var date = []
-
-      var data = [Math.random() * 300]
-
-      for (var i = 1; i < 20000; i++) {
-        var now = new Date(base += oneDay)
-        date.push([now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'))
-        data.push(Math.round((Math.random() - 0.5) * 20 + data[i - 1]))
-      }
       return {
-        line: {
-          tooltip: {
-            trigger: 'axis',
-            position: function (pt) {
-              return [pt[0], '10%']
-            }
-          },
-          title: {
-            left: 'center',
-            text: 'IOT 设备温度'
-          },
-          toolbox: {
-            feature: {
-              dataZoom: {
-                yAxisIndex: 'none'
-              },
-              restore: {},
-              saveAsImage: {}
-            }
-          },
-          xAxis: {
-            type: 'category',
-            boundaryGap: false,
-            data: date
-          },
-          yAxis: {
-            type: 'value',
-            boundaryGap: [0, '100%']
-          },
-          dataZoom: [{
-            type: 'inside',
-            start: 0,
-            end: 10
+        serialRecv: '',
+        serialSend: '',
+        serialSendFormat: 'serialSendStr',
+        portList: [
+          {
+            value: 'COM1',
+            label: 'COM1'
           }, {
-            start: 0,
-            end: 10,
-            handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
-            handleSize: '80%',
-            handleStyle: {
-              color: '#fff',
-              shadowBlur: 3,
-              shadowColor: 'rgba(0, 0, 0, 0.6)',
-              shadowOffsetX: 2,
-              shadowOffsetY: 2
-            }
+            value: 'COM2',
+            label: 'COM2'
+          }, {
+            value: 'COM3',
+            label: 'COM3'
           }],
-          series: [{
-            name: '模拟数据',
-            type: 'line',
-            smooth: true,
-            symbol: 'none',
-            sampling: 'average',
-            itemStyle: {
-              normal: {
-                color: 'rgb(255, 70, 131)'
-              }
-            },
-            areaStyle: {
-              normal: {
-                // color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                //   offset: 0,
-                //   color: 'rgb(255, 158, 68)'
-                // }, {
-                //   offset: 1,
-                //   color: 'rgb(255, 70, 131)'
-                // }])
-              }
-            },
-            data: data
-          }]
-        }
+        portSelect: 'COM2',
+        baudrateList: [
+          {
+            value: 9600,
+            label: '9600'
+          }, {
+            value: 19200,
+            label: '19200'
+          }, {
+            value: 38400,
+            label: '38400'
+          }, {
+            value: 57600,
+            label: '57600'
+          }, {
+            value: 115200,
+            label: '115200'
+          }],
+        baudrateSelect: 115200,
+        databitList: [
+          {
+            value: 5,
+            label: '5'
+          }, {
+            value: 6,
+            label: '6'
+          }, {
+            value: 7,
+            label: '7'
+          }, {
+            value: 8,
+            label: '8'
+          }],
+        databitSelect: 8,
+        stopbitList: [
+          {
+            value: 1,
+            label: '1'
+          }, {
+            value: 1.5,
+            label: '1.5'
+          }, {
+            value: 2,
+            label: '2'
+          }],
+        stopbitSelect: 1,
+        parityList: [
+          {
+            value: 'None',
+            label: 'None'
+          }, {
+            value: 'Even',
+            label: 'Even'
+          }, {
+            value: 'Odd',
+            label: 'Odd'
+          }, {
+            value: 'Mark',
+            label: 'Mark'
+          }, {
+            value: 'Space',
+            label: 'Space'
+          }],
+        paritySelect: 'None'
       }
     }
   }
@@ -130,11 +227,6 @@
     margin: 0;
     padding: 0;
   }
-
-  .echarts {
-    width: 500%;
-    height: 500px;
-  }
   /* body { font-family: 'Source Sans Pro', sans-serif; } */
 
   #wrapper {
@@ -145,67 +237,15 @@
         rgba(229, 229, 229, .9) 100%
       );
     height: 100vh;
-    padding: 60px 80px;
     width: 100vw;
   }
 
-  #logo {
+  #recv-area {
+    position: fixed;
     height: auto;
-    margin-bottom: 20px;
-    width: 420px;
-  }
-
-  main {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  main > div { flex-basis: 50%; }
-
-  .left-side {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .welcome {
-    color: #555;
-    font-size: 23px;
-    margin-bottom: 10px;
-  }
-
-  .title {
-    color: #2c3e50;
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 6px;
-  }
-
-  .title.alt {
-    font-size: 18px;
-    margin-bottom: 10px;
-  }
-
-  .doc p {
-    color: black;
-    margin-bottom: 10px;
-  }
-
-  .doc button {
-    font-size: .8em;
-    cursor: pointer;
-    outline: none;
-    padding: 0.75em 2em;
-    border-radius: 2em;
-    display: inline-block;
-    color: #fff;
-    background-color: #4fc08d;
-    transition: all 0.15s ease;
-    box-sizing: border-box;
-    border: 1px solid #4fc08d;
-  }
-
-  .doc button.alt {
-    color: #42b983;
-    background-color: transparent;
+    top:  0;
+    left: 240px;
+    bottom: 20px;
+    right: 20px;
   }
 </style>
