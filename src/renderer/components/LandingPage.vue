@@ -126,7 +126,11 @@
 
 <script>
   import SystemInformation from './LandingPage/SystemInformation'
-  
+  // import serialport from 'serialport'
+  import SerialPort from 'serialport'
+  // import ''
+  // require('serialport/package'
+  console.log(SerialPort)
   export default {
     name: 'landing-page',
     components: {
