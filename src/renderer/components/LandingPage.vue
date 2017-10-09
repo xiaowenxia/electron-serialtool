@@ -78,7 +78,7 @@
             <MenuItem name="6">
               <Row>
                   <Col span="24">
-                    <Button type="primary" long>打开串口</Button>
+                    <Button :type="portButtonColor" long @click="toOpeningPort">{{portButtonLabel}}</Button>
                   </Col>
               </Row>
             </MenuItem>
@@ -126,11 +126,26 @@
 
 <script>
   import SystemInformation from './LandingPage/SystemInformation'
-  // import serialport from 'serialport'
   import SerialPort from 'serialport'
-  // import ''
-  // require('serialport/package'
-  console.log(SerialPort)
+
+  let portList = [], curPort, curPortState = false
+
+  SerialPort.list(function (err, ports) {
+  console.log("串口列表")
+  ports.forEach(function(port) {
+    console.log(port.comName);
+    // console.log(port.pnpId);
+    // console.log(port.manufacturer);
+
+    
+    portList.push({
+      value: port.comName,
+      label: port.comName
+    })
+  });
+});
+  
+
   export default {
     name: 'landing-page',
     components: {
@@ -143,18 +158,8 @@
         serialRecv: '',
         serialSend: '',
         serialSendFormat: 'serialSendStr',
-        portList: [
-          {
-            value: 'COM1',
-            label: 'COM1'
-          }, {
-            value: 'COM2',
-            label: 'COM2'
-          }, {
-            value: 'COM3',
-            label: 'COM3'
-          }],
-        portSelect: 'COM2',
+        portList: portList,
+        portSelect: '',
         baudrateList: [
           {
             value: 9600,
@@ -202,8 +207,8 @@
         stopbitSelect: 1,
         parityList: [
           {
-            value: 'None',
-            label: 'None'
+            value: 'none',
+            label: 'none'
           }, {
             value: 'Even',
             label: 'Even'
@@ -217,8 +222,53 @@
             value: 'Space',
             label: 'Space'
           }],
-        paritySelect: 'None'
+        paritySelect: 'none',
+        portButtonColor: 'primary',
+        portButtonLabel: '打开串口',
       }
+    },
+    methods: {
+        toOpeningPort(){
+            var that = this
+            if(this.portSelect === '')
+            {
+              console.log("未选择串口")
+              return
+            }
+            if(curPortState === true)
+            {
+              curPort.close(function(){
+                console.log("close ok")
+                curPortState = false
+                that.portButtonLabel = '打开串口'
+                that.portButtonColor = 'primary'
+              })
+            }
+
+            this.openingPort = true
+            let option = {
+              baudRate: this.baudrateSelect,
+              dataBits: this.databitSelect,
+              stopBits: this.stopbitSelect,
+              parity: this.paritySelect
+            }
+            
+            curPort = new SerialPort(this.portSelect, option, function (err) {
+              if (err) {
+                console.log('Error: ', err.message)
+                that.portButtonLabel = '打开串口'
+                return
+              }
+            })
+            // The open event is always emitted
+            curPort.on('open', function() {
+              // open logic
+              console.log("open success")
+              curPortState = true
+              that.portButtonLabel = '关闭串口'
+              that.portButtonColor = 'error'
+            })
+        }
     }
   }
 </script>
