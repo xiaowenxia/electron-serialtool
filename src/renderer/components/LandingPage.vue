@@ -23,7 +23,7 @@
                     </Select>
                   </Col>
                   <Col span="6">
-                    <Button type="primary" shape="circle" size="small" icon="ios-loop" style="margin:0 auto;display:block"></Button>
+                    <Button type="primary" shape="circle" size="small" icon="ios-loop" @click="toFreshPort" style="margin:0 auto;display:block"></Button>
                   </Col>
               </Row>
             </MenuItem>
@@ -92,7 +92,7 @@
                     
                   </Col>
                   <Col span="12">
-                    <span>0 bytes</span>
+                    <span>{{sendCnt}} bytes</span>
                   </Col>
               </Row>
                 
@@ -104,26 +104,27 @@
                     <span style="margin-left:10px">接收</span>
                   </Col>
                   <Col span="12">
-                    <span>0 bytes</span>
+                    <span>{{recvCnt}} bytes</span>
                   </Col>
                 </Row>
             </MenuItem>
         </MenuGroup>
     </Menu>
-    <div id="recv-area">
-      <div id="app" style="height: 90%;width:100%">
-        <div>fdsafd</div>
+    <div id="contentArea">
+      <div id="recvArea">
+        <div><span>暂无数据</span></div>
       </div>
       <!-- <Input v-model="serialRecv" type="textarea" :rows="28" placeholder="暂时没有数据"></Input> -->
       <!-- <p contenteditable="true">{{serialRecv}}</p> -->
       <!-- <p>{{serialRecv}}</p> -->
-      <Input v-model="serialSend">
-        <Select v-model="serialSendFormat" slot="prepend" style="width: 80px">
+      <Input v-model="serialSend" style="padding:15px">
+        <Select v-model="serialSendFormat" slot="prepend" placement='top' style="width: 80px">
             <Option value="serialSendStr">字符串</Option>
             <Option value="serialSendHex">十六进制</Option>
         </Select>
-        <Button slot="append" icon="android-send" @click="toSendData"></Button>
+        <Button slot="append" icon="android-send" @click="toSendData" style="background-color:#2d8cf0"></Button>
       </Input>
+      <Checkbox v-model="sendEnter" size='large'>\r\n</Checkbox>
     </div>
     <br>
   </div>
@@ -136,21 +137,27 @@
 
   let portList = [], curPort, curPortState = false
 
-  SerialPort.list(function (err, ports) {
-    console.log("串口列表")
-    ports.forEach(function(port) {
-      console.log(port.comName);
-      // console.log(port.pnpId);
-      // console.log(port.manufacturer);
+  function freshPort(){
+    /* 清除现有的串口 */
+    portList = []
 
-      
-      portList.push({
-        value: port.comName,
-        label: port.comName
-      })
+    SerialPort.list(function (err, ports) {
+      console.log("串口列表")
+      ports.forEach(function(port) {
+        console.log(port.comName);
+        // console.log(port.pnpId);
+        // console.log(port.manufacturer);
+
+        
+        portList.push({
+          value: port.comName,
+          label: port.comName
+        })
+      });
     });
-  });
+  }
   
+  freshPort();
 
   export default {
     name: 'landing-page',
@@ -231,92 +238,102 @@
         paritySelect: 'none',
         portButtonColor: 'primary',
         portButtonLabel: '打开串口',
+        sendEnter: true,
+        sendCnt: 0,
+        recvCnt: 0
       }
     },
     methods: {
-        toSendData(){
-          if(curPortState === false)
+      toFreshPort(){
+        freshPort();
+      },
+      toSendData(){
+        var that = this
+        if(curPortState === false)
+        {
+          console.log("未打开串口")
+          return
+        }
+        // console.log(this.serialSend)
+        curPort.write(this.serialSend + '\r\n', (err) =>{
+          if(err) console.log(err)
+          console.log("发送成功")
+          that.sendCnt += that.serialSend.length
+        })
+      },
+      toOpeningPort(){
+          var that = this
+          if(this.portSelect === '')
           {
-            console.log("未打开串口")
+            console.log("未选择串口")
             return
           }
-          curPort.write(this.serialSend)
-        },
-        toOpeningPort(){
-            var that = this
-            if(this.portSelect === '')
-            {
-              console.log("未选择串口")
-              return
-            }
-            if(curPortState === true)
-            {
-              curPort.close((err) => {
-                if (err) {
-                  return console.log('Error closing port: ', err.message);
-                }
-                console.log("close ok")
-                curPortState = false
-                that.portButtonLabel = '打开串口'
-                that.portButtonColor = 'primary'
-              })
-              return
-            }
-
-            this.openingPort = true
-            let option = {
-              baudRate: this.baudrateSelect,
-              dataBits: this.databitSelect,
-              stopBits: this.stopbitSelect,
-              parity: this.paritySelect
-            }
-            
-            curPort = new SerialPort(this.portSelect, option, function (err) {
+          console.log()
+          if(curPortState === true)
+          {
+            curPort.close((err) => {
               if (err) {
-                console.log('Error: ', err.message)
-                that.portButtonLabel = '打开串口'
-                return
+                return console.log('Error closing port: ', err.message);
               }
-              console.log("open success")
-              curPortState = true
-              that.portButtonLabel = '关闭串口'
-              that.portButtonColor = 'error'
+              console.log("close ok")
+              curPortState = false
+              that.portButtonLabel = '打开串口'
+              that.portButtonColor = 'primary'
             })
-            
-            const Readline = SerialPort.parsers.Readline;
-            const parser = new Readline();
-            curPort.pipe(parser);
-            parser.on('data', (data) => {
-              console.log(data)
-              // var rcvDataArea = Vue.extend({
-              //   template: '<div>Hello World</div>'
-              // })
-              // console.log(new rcvDataArea())
-              // new rcvDataArea().$mount().$appendTo('#recvArea');//appendTo
-              var domApp = document.getElementById('app');
-              var rcvData = document.createElement('p');
-              rcvData.innerText = data;
-              domApp.appendChild(rcvData);
-            });
+            return
+          }
 
-            // Read data that is available but keep the stream from entering "flowing mode"
-            // curPort.on('readable', function () {
-            //   let readData = curPort.read()
-            //    that.serialRecv = that.serialRecv + readData
-            //   // console.log('Data:', readData);
-            // });
-            
-            // curPort.open((err) => {
-            //   if (err) {
-            //     console.log(err)
-            //     return console.log('Error opening port: ', err.message);
-            //   }
-            //   console.log("open success")
-            //   curPortState = true
-            //   that.portButtonLabel = '关闭串口'
-            //   that.portButtonColor = 'error'
-            // })
-        }
+          let option = {
+            baudRate: this.baudrateSelect,
+            dataBits: this.databitSelect,
+            stopBits: this.stopbitSelect,
+            parity: this.paritySelect,
+            autoOpen: false
+          }
+          
+          curPort = new SerialPort(this.portSelect, option, function (err) {
+            if (err) {
+              console.log('Error: ', err.message)
+              curPortState = false
+              that.portButtonLabel = '打开串口'
+              return
+            }
+          })
+          
+          // Switches the port into "flowing mode"
+          // curPort.on('data', function (data) {
+          //   console.log('Data:' + data);
+          // });
+
+          const Readline = SerialPort.parsers.Readline;
+          const parser = new Readline({ delimiter: '\r\n' });
+          curPort.pipe(parser);
+          // parser.on('data', console.log)
+          parser.on('data', (data) => {
+            var recvArea = document.getElementById('recvArea');
+            console.log(recvArea)
+            var recvData = document.createElement('div');
+            recvData.innerText = data;
+            recvArea.appendChild(recvData);
+            that.recvCnt += data.length
+          });
+
+          // Read data that is available but keep the stream from entering "flowing mode"
+          curPort.on('error', function (err) {
+            console.log("something error")
+            console.log(err)
+          });
+          
+          curPort.open((err) => {
+            if (err) {
+              return console.log('Error opening port: ', err.message);
+            }
+            console.log("open success")
+            curPortState = true
+            that.portButtonLabel = '关闭串口'
+            that.portButtonColor = 'error'
+          })
+      }
     }
   }
 </script>
@@ -341,12 +358,24 @@
     width: 100vw;
   }
 
-  #recv-area {
+  #contentArea {
     position: fixed;
     height: auto;
     top:  0;
     left: 240px;
     bottom: 20px;
     right: 20px;
+    background-color:rgba(255, 235, 205, 0.16)
+  }
+  #recvArea {
+    overflow: auto;
+    height: 90%;
+    margin: 20px;
+    background-color: white;
+    border-radius: 20px;
+    font-size: 18px;
+  }
+  #recvArea div {
+    margin-left:10px;
   }
 </style>
