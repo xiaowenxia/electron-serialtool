@@ -111,7 +111,12 @@
         </MenuGroup>
     </Menu>
     <div id="recv-area">
-      <Input v-model="serialRecv" type="textarea" :rows="28" placeholder="暂时没有数据"></Input>
+      <div id="app" style="height: 90%;width:100%">
+        <div>fdsafd</div>
+      </div>
+      <!-- <Input v-model="serialRecv" type="textarea" :rows="28" placeholder="暂时没有数据"></Input> -->
+      <!-- <p contenteditable="true">{{serialRecv}}</p> -->
+      <!-- <p>{{serialRecv}}</p> -->
       <Input v-model="serialSend">
         <Select v-model="serialSendFormat" slot="prepend" style="width: 80px">
             <Option value="serialSendStr">字符串</Option>
@@ -127,23 +132,24 @@
 <script>
   import SystemInformation from './LandingPage/SystemInformation'
   import SerialPort from 'serialport'
+  import Vue from 'vue'
 
   let portList = [], curPort, curPortState = false
 
   SerialPort.list(function (err, ports) {
-  console.log("串口列表")
-  ports.forEach(function(port) {
-    console.log(port.comName);
-    // console.log(port.pnpId);
-    // console.log(port.manufacturer);
+    console.log("串口列表")
+    ports.forEach(function(port) {
+      console.log(port.comName);
+      // console.log(port.pnpId);
+      // console.log(port.manufacturer);
 
-    
-    portList.push({
-      value: port.comName,
-      label: port.comName
-    })
+      
+      portList.push({
+        value: port.comName,
+        label: port.comName
+      })
+    });
   });
-});
   
 
   export default {
@@ -276,12 +282,29 @@
               that.portButtonLabel = '关闭串口'
               that.portButtonColor = 'error'
             })
-            // Read data that is available but keep the stream from entering "flowing mode"
-            curPort.on('readable', function () {
-              let readData = curPort.read()
-               that.serialRecv = readData
-              console.log('Data:', readData);
+            
+            const Readline = SerialPort.parsers.Readline;
+            const parser = new Readline();
+            curPort.pipe(parser);
+            parser.on('data', (data) => {
+              console.log(data)
+              // var rcvDataArea = Vue.extend({
+              //   template: '<div>Hello World</div>'
+              // })
+              // console.log(new rcvDataArea())
+              // new rcvDataArea().$mount().$appendTo('#recvArea');//appendTo
+              var domApp = document.getElementById('app');
+              var rcvData = document.createElement('p');
+              rcvData.innerText = data;
+              domApp.appendChild(rcvData);
             });
+
+            // Read data that is available but keep the stream from entering "flowing mode"
+            // curPort.on('readable', function () {
+            //   let readData = curPort.read()
+            //    that.serialRecv = that.serialRecv + readData
+            //   // console.log('Data:', readData);
+            // });
             
             // curPort.open((err) => {
             //   if (err) {
@@ -300,7 +323,6 @@
 
 <style>
   /* @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro'); */
-
   * {
     box-sizing: border-box;
     margin: 0;
