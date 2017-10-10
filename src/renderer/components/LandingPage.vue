@@ -117,7 +117,7 @@
             <Option value="serialSendStr">字符串</Option>
             <Option value="serialSendHex">十六进制</Option>
         </Select>
-        <Button slot="append" icon="android-send"></Button>
+        <Button slot="append" icon="android-send" @click="toSendData"></Button>
       </Input>
     </div>
     <br>
@@ -228,6 +228,14 @@
       }
     },
     methods: {
+        toSendData(){
+          if(curPortState === false)
+          {
+            console.log("未打开串口")
+            return
+          }
+          curPort.write(this.serialSend)
+        },
         toOpeningPort(){
             var that = this
             if(this.portSelect === '')
@@ -237,12 +245,16 @@
             }
             if(curPortState === true)
             {
-              curPort.close(function(){
+              curPort.close((err) => {
+                if (err) {
+                  return console.log('Error closing port: ', err.message);
+                }
                 console.log("close ok")
                 curPortState = false
                 that.portButtonLabel = '打开串口'
                 that.portButtonColor = 'primary'
               })
+              return
             }
 
             this.openingPort = true
@@ -259,15 +271,28 @@
                 that.portButtonLabel = '打开串口'
                 return
               }
-            })
-            // The open event is always emitted
-            curPort.on('open', function() {
-              // open logic
               console.log("open success")
               curPortState = true
               that.portButtonLabel = '关闭串口'
               that.portButtonColor = 'error'
             })
+            // Read data that is available but keep the stream from entering "flowing mode"
+            curPort.on('readable', function () {
+              let readData = curPort.read()
+               that.serialRecv = readData
+              console.log('Data:', readData);
+            });
+            
+            // curPort.open((err) => {
+            //   if (err) {
+            //     console.log(err)
+            //     return console.log('Error opening port: ', err.message);
+            //   }
+            //   console.log("open success")
+            //   curPortState = true
+            //   that.portButtonLabel = '关闭串口'
+            //   that.portButtonColor = 'error'
+            // })
         }
     }
   }
