@@ -17,3 +17,6 @@ npm run build
 
 #### 界面
 ![](https://github.com/xiaowenxia/electron-serialtool/blob/master/doc/界面.png)
+
+#### 界面2
+![](https://github.com/xiaowenxia/electron-serialtool/blob/master/doc/界面2.png)
