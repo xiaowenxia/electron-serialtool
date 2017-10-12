@@ -16,6 +16,7 @@ npm run build
 ```
 
 #### 界面
+界面还需要调整。
 ![](https://github.com/xiaowenxia/electron-serialtool/blob/master/doc/界面.png)
 
 #### 界面2
