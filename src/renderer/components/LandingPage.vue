@@ -117,7 +117,7 @@
       <!-- <Input v-model="serialRecv" type="textarea" :rows="28" placeholder="暂时没有数据"></Input> -->
       <!-- <p contenteditable="true">{{serialRecv}}</p> -->
       <!-- <p>{{serialRecv}}</p> -->
-      <Input v-model="serialSend" style="padding:15px">
+      <Input v-model="serialSend" style="padding-left:15px;padding-right:15px">
         <Select v-model="serialSendFormat" slot="prepend" placement='top' style="width: 80px">
             <Option value="serialSendStr">字符串</Option>
             <Option value="serialSendHex">十六进制</Option>
@@ -370,7 +370,7 @@
   #recvArea {
     overflow: auto;
     height: 90%;
-    margin: 20px;
+    margin: 20px 20px 10px 20px;
     background-color: white;
     border-radius: 20px;
     font-size: 18px;
