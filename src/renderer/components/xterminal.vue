@@ -1,7 +1,5 @@
 <template>
-  <div>
     <div id="terminalContain"></div>
-  </div>
 </template>
 
 <script>
@@ -13,11 +11,11 @@ export default {
       name: "terminal"
     };
   },
-  created: function() {
-      console.log("created")
+  mounted: function() {
+      console.log("mounted")
     let term = new Terminal();
 
-    term.open(document.getElementById("terminalContain"), true);
+    term.open(document.getElementById("terminalContain"));
     term.write("没有数据");
   }
 };
