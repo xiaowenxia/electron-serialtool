@@ -3,22 +3,22 @@
 </template>
 
 <script>
-import { Terminal } from "xterm";
+import { Terminal } from 'xterm'
 
 export default {
-  data() {
+  data () {
     return {
-      name: "terminal"
-    };
+      name: 'terminal'
+    }
   },
-  mounted: function() {
-      console.log("mounted")
-    let term = new Terminal();
+  mounted: function () {
+    console.log('mounted')
+    let term = new Terminal()
 
-    term.open(document.getElementById("terminalContain"));
-    term.write("没有数据");
+    term.open(document.getElementById('terminalContain'))
+    term.write('没有数据')
   }
-};
+}
 </script>
 
 <style scoped>

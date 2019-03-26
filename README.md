@@ -6,6 +6,7 @@
 
 ``` bash
 # install dependencies
+npm instll -g eslint
 npm install
 
 # serve with hot reload at localhost:9080

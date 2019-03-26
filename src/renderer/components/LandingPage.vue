@@ -135,172 +135,170 @@
 </template>
 
 <script>
-import SerialPort from "serialport";
-import Vue from "vue";
-import { Terminal } from "xterm";
+import SerialPort from 'serialport'
 import $ from 'jquery/dist/jquery.js'
 
 // let term = new Terminal({
 //   cursorBlink: true
 // });
-let portList = [],
-  curPort,
-  curPortState = false;
+let portList = []
+let curPort
+let curPortState = false
 
-function freshPort() {
+function freshPort () {
   /* 清除现有的串口 */
-  portList = [];
+  portList = []
 
-  SerialPort.list(function(err, ports) {
-    console.log("串口列表");
-    ports.forEach(function(port) {
-      console.log(port.comName);
+  SerialPort.list(function (err, ports) {
+    if (err) {}
+    console.log('串口列表')
+    ports.forEach(function (port) {
+      console.log(port.comName)
       // console.log(port.pnpId);
       // console.log(port.manufacturer);
 
       portList.push({
         value: port.comName,
         label: port.comName
-      });
-    });
-  });
+      })
+    })
+  })
 }
 
-freshPort();
+freshPort()
 
 export default {
-  name: "landing-page",
+  name: 'landing-page',
   components: {},
-  methods: {},
-  data: function() {
+  data: function () {
     return {
-      serialRecv: "",
-      serialSend: "",
-      serialSendFormat: "serialSendStr",
+      serialRecv: '',
+      serialSend: '',
+      serialSendFormat: 'serialSendStr',
       portList: portList,
-      portSelect: "",
+      portSelect: '',
       baudrateList: [
         {
           value: 9600,
-          label: "9600"
+          label: '9600'
         },
         {
           value: 19200,
-          label: "19200"
+          label: '19200'
         },
         {
           value: 38400,
-          label: "38400"
+          label: '38400'
         },
         {
           value: 57600,
-          label: "57600"
+          label: '57600'
         },
         {
           value: 115200,
-          label: "115200"
+          label: '115200'
         }
       ],
       baudrateSelect: 115200,
       databitList: [
         {
           value: 5,
-          label: "5"
+          label: '5'
         },
         {
           value: 6,
-          label: "6"
+          label: '6'
         },
         {
           value: 7,
-          label: "7"
+          label: '7'
         },
         {
           value: 8,
-          label: "8"
+          label: '8'
         }
       ],
       databitSelect: 8,
       stopbitList: [
         {
           value: 1,
-          label: "1"
+          label: '1'
         },
         {
           value: 1.5,
-          label: "1.5"
+          label: '1.5'
         },
         {
           value: 2,
-          label: "2"
+          label: '2'
         }
       ],
       stopbitSelect: 1,
       parityList: [
         {
-          value: "none",
-          label: "none"
+          value: 'none',
+          label: 'none'
         },
         {
-          value: "Even",
-          label: "Even"
+          value: 'Even',
+          label: 'Even'
         },
         {
-          value: "Odd",
-          label: "Odd"
+          value: 'Odd',
+          label: 'Odd'
         },
         {
-          value: "Mark",
-          label: "Mark"
+          value: 'Mark',
+          label: 'Mark'
         },
         {
-          value: "Space",
-          label: "Space"
+          value: 'Space',
+          label: 'Space'
         }
       ],
-      paritySelect: "none",
-      portButtonColor: "primary",
-      portButtonLabel: "打开串口",
+      paritySelect: 'none',
+      portButtonColor: 'primary',
+      portButtonLabel: '打开串口',
       sendEnter: true,
       sendCnt: 0,
       recvCnt: 0
-    };
+    }
   },
   methods: {
-    toFreshPort() {
-      freshPort();
+    toFreshPort () {
+      freshPort()
     },
-    toSendData() {
-      var that = this;
+    toSendData () {
+      var that = this
       if (curPortState === false) {
-        console.log("未打开串口");
-        return;
+        console.log('未打开串口')
+        return
       }
       // console.log(this.serialSend)
-      curPort.write(this.serialSend + "\r\n", err => {
-        if (err) console.log(err);
-        console.log("发送成功");
-        that.sendCnt += that.serialSend.length;
-      });
+      curPort.write(this.serialSend + '\r\n', err => {
+        if (err) console.log(err)
+        console.log('发送成功')
+        that.sendCnt += that.serialSend.length
+      })
     },
-    toOpeningPort() {
-      var that = this;
-      if (this.portSelect === "") {
-        console.log("未选择串口");
-        return;
+    toOpeningPort () {
+      var that = this
+      if (this.portSelect === '') {
+        console.log('未选择串口')
+        return
       }
-      console.log();
+      console.log()
       if (curPortState === true) {
         curPort.close(err => {
           if (err) {
-            return console.log("Error closing port: ", err.message);
+            return console.log('Error closing port: ', err.message)
           }
-          console.log("close ok");
-          curPortState = false;
-          that.portButtonLabel = "打开串口";
-          that.portButtonColor = "primary";
-        });
-        return;
+          console.log('close ok')
+          curPortState = false
+          that.portButtonLabel = '打开串口'
+          that.portButtonColor = 'primary'
+        })
+        return
       }
 
       let option = {
@@ -309,59 +307,59 @@ export default {
         stopBits: this.stopbitSelect,
         parity: this.paritySelect,
         autoOpen: false
-      };
+      }
 
-      curPort = new SerialPort(this.portSelect, option, function(err) {
+      curPort = new SerialPort(this.portSelect, option, function (err) {
         if (err) {
-          console.log("Error: ", err.message);
-          curPortState = false;
-          that.portButtonLabel = "打开串口";
+          console.log('Error: ', err.message)
+          curPortState = false
+          that.portButtonLabel = '打开串口'
         }
-      });
+      })
 
       // Switches the port into "flowing mode"
       // curPort.on('data', function (data) {
       //   console.log('Data:' + data);
       // });
 
-      const Readline = SerialPort.parsers.Readline;
-      const parser = new Readline({ delimiter: "\r\n" });
-      curPort.pipe(parser);
+      const Readline = SerialPort.parsers.Readline
+      const parser = new Readline({ delimiter: '\r\n' })
+      curPort.pipe(parser)
       // parser.on('data', console.log)
-      parser.on("data", data => {
+      parser.on('data', data => {
         var recvArea = document.getElementById('recvArea')
-        var recvArea = $("#recvArea .ivu-card-body")
+        recvArea = $('#recvArea .ivu-card-body')
         console.log(recvArea)
         var newLine = document.createElement('div')
         newLine.innerText = data
         recvArea.append(newLine)
-        //term.write(data);
-        that.recvCnt += data.length;
-      });
+        // term.write(data);
+        that.recvCnt += data.length
+      })
 
       // Read data that is available but keep the stream from entering "flowing mode"
-      curPort.on("error", function(err) {
-        console.log("something error");
-        console.log(err);
-      });
+      curPort.on('error', function (err) {
+        console.log('something error')
+        console.log(err)
+      })
 
       curPort.open(err => {
         if (err) {
-          return console.log("Error opening port: ", err.message);
+          return console.log('Error opening port: ', err.message)
         }
-        console.log("open success");
-        curPortState = true;
-        that.portButtonLabel = "关闭串口";
-        that.portButtonColor = "error";
-      });
+        console.log('open success')
+        curPortState = true
+        that.portButtonLabel = '关闭串口'
+        that.portButtonColor = 'error'
+      })
     }
   },
-  mounted: function() {
-    console.log("mounted");
+  mounted: function () {
+    console.log('mounted')
     // term.open(document.getElementById("terminalContain"));
     // term.write("没有数据");
   }
-};
+}
 </script>
 
 <style>
